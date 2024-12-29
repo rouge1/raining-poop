@@ -1,4 +1,5 @@
 Overview
+
 The Raining Poop App is a fun and interactive application built using Python's tkinter library. 
 The app features a raining poop emoji animation with a counter that increments as the poop emojis fall. 
 The emojis follow different movement patterns, including zigzag, spiral, and straight paths. 
