@@ -18,4 +18,5 @@ Customizable: Easily modify the speed, patterns, and appearance of the poop emoj
 Dependencies
 
 tkinter: Standard Python interface to the Tk GUI toolkit.
+
 Pillow: Python Imaging Library (PIL) fork for image processing.
