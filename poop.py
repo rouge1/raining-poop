@@ -1,143 +1,147 @@
-import tkinter as tk
-from PIL import Image, ImageTk
+import pygame
+from PIL import Image
 import random
 import math
 
 class RainingPoopApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Counting with Raining Poop")
-        
-        # Set window size
-        self.root.geometry("400x600")
-        
-        # Create canvas
-        self.canvas = tk.Canvas(root, bg='white', width=400, height=600)
-        self.canvas.pack(fill="both", expand=True)
-        
-        # Load and process poop emoji image
+    def __init__(self):
+        pygame.init()
+        self.screen = pygame.display.set_mode((400, 600))
+        pygame.display.set_caption("Counting with Raining Poop")
+        self.clock = pygame.time.Clock()
+        self.fps = 60
+
+        # Load and process poop emoji image with PIL
         poop_image = Image.open(r"poop_emoji.png")
         poop_image = poop_image.convert("RGBA")
-        
+
         # Get the image data
         datas = poop_image.getdata()
-        
+
         # Create a new image with transparent background
         new_data = []
         threshold = 230
-        
+
         for item in datas:
             if item[0] >= threshold and item[1] >= threshold and item[2] >= threshold:
                 new_data.append((255, 255, 255, 0))
             else:
                 new_data.append(item)
-                
+
         poop_image.putdata(new_data)
-        
-        # Store the base image (resized)
-        base_image = poop_image.resize((30, 30), Image.Resampling.LANCZOS)
-        self.base_photo = ImageTk.PhotoImage(base_image)
-        
-        # Create rotated versions of the image for animation
-        self.poop_photos = []
-        for angle in range(0, 360, 10):  # Create 36 rotated versions
-            rotated = poop_image.rotate(angle, expand=True)
-            rotated = rotated.resize((30, 30), Image.Resampling.LANCZOS)
-            self.poop_photos.append(ImageTk.PhotoImage(rotated))
-        
+
+        # Convert PIL image to Pygame surface
+        self.base_image = pygame.image.fromstring(
+            poop_image.tobytes(), poop_image.size, poop_image.mode
+        ).convert_alpha()
+        self.base_image = pygame.transform.scale(self.base_image, (30, 30))
+
+        # Create rotated versions
+        self.poop_images = []
+        for angle in range(0, 360, 10):
+            rotated = pygame.transform.rotate(self.base_image, angle)
+            self.poop_images.append(rotated)
+
+        # Font for counter
+        self.font = pygame.font.Font(None, 48)
+
         # Counter variables
         self.count = 0
         self.max_count = 50
-        
-        # Counter label
-        self.counter_label = self.canvas.create_text(
-            200, 300,
-            text="0",
-            font=('Arial', 48, 'bold'),
-            fill='black'
-        )
-        
-        # List to store poop images with their properties
+
+        # Timer for counter update
+        pygame.time.set_timer(pygame.USEREVENT, 200)  # Every 200ms
+
+        # List to store poop objects
         self.poops = []
-        
-        # Start animations
-        self.update_counter()
-        self.create_poop()
-        self.animate_poop()
-    
+
+        # Timer for creating new poop
+        pygame.time.set_timer(pygame.USEREVENT + 1, 500)  # Every 500ms
+
+    def run(self):
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.USEREVENT:
+                    self.update_counter()
+                elif event.type == pygame.USEREVENT + 1:
+                    self.create_poop()
+
+            self.animate_poop()
+            self.draw()
+            self.clock.tick(self.fps)
+
+        pygame.quit()
+
     def update_counter(self):
         self.count += 1
         if self.count > self.max_count:
             self.count = 1
-        self.canvas.itemconfig(self.counter_label, text=str(self.count))
-        self.root.after(200, self.update_counter)
-    
+
     def create_poop(self):
-        x = random.randint(0, 350)
-        
-        # Randomly choose movement pattern
+        x = random.randint(0, 370)  # Adjusted for image width
+
         pattern = random.choice(['zigzag', 'spiral', 'straight'])
-        
-        # Randomly decide if this poop will rotate (50% chance)
         should_rotate = random.choice([True, False])
-        
+
         poop = {
-            'id': self.canvas.create_image(x, -20, image=self.base_photo),
+            'x': x,
+            'y': -20,
             'speed': random.uniform(2, 5),
             'pattern': pattern,
-            'angle': 0,
             'phase': 0,
-            'photo_index': 0,
-            'x': x,
-            'rotating': should_rotate
+            'rotating': should_rotate,
+            'angle': 0,
+            'image_index': 0
         }
-        
+
         self.poops.append(poop)
-        self.root.after(500, self.create_poop)
-    
+
     def animate_poop(self):
         for poop in self.poops[:]:
-            current_pos = self.canvas.coords(poop['id'])
-            
-            if current_pos:  # Check if poop still exists
-                x, y = current_pos
-                
-                # Update rotation only if this poop is supposed to rotate
-                if poop['rotating']:
-                    poop['photo_index'] = (poop['photo_index'] + 1) % len(self.poop_photos)
-                    self.canvas.itemconfig(poop['id'], image=self.poop_photos[poop['photo_index']])
-                
-                # Calculate movement based on pattern
-                if poop['pattern'] == 'zigzag':
-                    amplitude = 30
-                    frequency = 0.05
-                    dx = amplitude * math.sin(poop['phase'])
-                    poop['phase'] += frequency
-                    new_x = poop['x'] + dx
-                    self.canvas.coords(poop['id'], new_x, y + poop['speed'])
-                
-                elif poop['pattern'] == 'spiral':
-                    radius = 20
-                    frequency = 0.1
-                    dx = radius * math.cos(poop['phase'])
-                    poop['phase'] += frequency
-                    new_x = poop['x'] + dx
-                    self.canvas.coords(poop['id'], new_x, y + poop['speed'])
-                
-                else:  # straight pattern
-                    self.canvas.move(poop['id'], 0, poop['speed'])
-                
-                # Remove if off screen
-                if y > 600:
-                    self.canvas.delete(poop['id'])
-                    self.poops.remove(poop)
-                    
-        self.root.after(20, self.animate_poop)
+            # Update rotation
+            if poop['rotating']:
+                poop['image_index'] = (poop['image_index'] + 1) % len(self.poop_images)
+
+            # Calculate movement
+            if poop['pattern'] == 'zigzag':
+                amplitude = 30
+                frequency = 0.05
+                dx = amplitude * math.sin(poop['phase'])
+                poop['phase'] += frequency
+                poop['x'] += dx
+            elif poop['pattern'] == 'spiral':
+                radius = 20
+                frequency = 0.1
+                dx = radius * math.cos(poop['phase'])
+                poop['phase'] += frequency
+                poop['x'] += dx
+
+            poop['y'] += poop['speed']
+
+            # Remove if off screen
+            if poop['y'] > 600:
+                self.poops.remove(poop)
+
+    def draw(self):
+        self.screen.fill((255, 255, 255))  # White background
+
+        # Draw poops
+        for poop in self.poops:
+            image = self.poop_images[poop['image_index']] if poop['rotating'] else self.base_image
+            self.screen.blit(image, (poop['x'], poop['y']))
+
+        # Draw counter
+        text = self.font.render(str(self.count), True, (0, 0, 0))
+        self.screen.blit(text, (200 - text.get_width() // 2, 300 - text.get_height() // 2))
+
+        pygame.display.flip()
 
 def main():
-    root = tk.Tk()
-    app = RainingPoopApp(root)
-    root.mainloop()
+    app = RainingPoopApp()
+    app.run()
 
 if __name__ == "__main__":
     main()

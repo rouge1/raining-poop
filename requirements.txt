@@ -1,0 +1,8 @@
+# Raining Poop Application Dependencies
+# Compatible with Python 3.12.3+
+
+# Image processing library for loading and manipulating the poop emoji image
+pillow>=10.0.0
+
+# Game development library for graphics, animations, and window management
+pygame>=2.5.0
