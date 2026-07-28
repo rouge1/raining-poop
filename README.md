@@ -18,26 +18,29 @@ A fun and interactive Python application featuring animated poop emoji rain with
 
 - **Pygame**: High-performance game development library for graphics and animations
 - **Pillow (PIL)**: Advanced image processing for emoji manipulation and transparency
-- **Python 3.12.3+**: Modern Python with full compatibility
+- **Python 3.10+**: Compatible with modern Python (tested on 3.12)
 
 ## 📋 Requirements
 
-- Python 3.12.3 or higher
+- Python 3.10 or higher
 - See `requirements.txt` for package dependencies
 
 ## 🚀 Installation & Setup
 
 ### Using Conda (Recommended)
 
-1. **Create a conda environment**:
+The project expects a dedicated environment named **`poop`**. No other environment
+on this machine ships a compatible pygame, so create it before the first run:
+
+1. **Create and activate the environment**:
    ```bash
    conda create -n poop python=3.12
    conda activate poop
    ```
 
-2. **Install dependencies**:
+2. **Install dependencies** (pygame 2.5+ and pillow 10+, matching `requirements.txt`):
    ```bash
-   conda install -c conda-forge pygame pillow
+   conda install -c conda-forge "pygame>=2.5" "pillow>=10"
    ```
 
 3. **Run the application**:
@@ -65,4 +68,26 @@ A fun and interactive Python application featuring animated poop emoji rain with
 4. The counter in the center will increment from 1 to 50 and loop
 5. Close the window or press Ctrl+C to exit
 
+## 🩺 Troubleshooting
+
+**`X Error of failed request: BadValue ... NV-GLX` on startup (Linux/X11)**
+
+SDL probes the NVIDIA GLX path and the X server rejects it, so the window never
+opens. Force SDL onto EGL instead:
+
+```bash
+SDL_VIDEO_X11_FORCE_EGL=1 python poop.py
+```
+
+Add `export SDL_VIDEO_X11_FORCE_EGL=1` to your shell profile to make it stick.
+This is a driver/display issue, not an application bug — `LIBGL_ALWAYS_SOFTWARE`
+and `SDL_RENDER_DRIVER=software` do **not** work around it.
+
 ## 🛠️ Dependencies
+
+| Package | Version | Used for |
+| --- | --- | --- |
+| [pygame](https://www.pygame.org/) | `>=2.5.0` | Window management, sprite blitting, rotation, timers, event loop |
+| [Pillow](https://python-pillow.org/) | `>=10.0.0` | Loading `poop_emoji.png` and keying its white background to transparent |
+
+Install both at once with `pip install -r requirements.txt`.
