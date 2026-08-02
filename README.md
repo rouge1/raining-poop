@@ -69,6 +69,20 @@ on this machine ships a compatible pygame, so create it before the first run:
 4. The counter in the center will increment from 1 to 50 and loop
 5. Close the window or press Ctrl+C to exit
 
+## 📁 Project Layout
+
+| Path | What it is |
+| --- | --- |
+| `poop.py` | The entire application — one `RainingPoopApp` class |
+| `poop_emoji.png` | Sprite source; its white background is keyed out at load |
+| `background.jpg` | Sky backdrop (see [Assets](#-assets)) |
+| `CLAUDE.md` | Notes for contributors: architecture and common pitfalls |
+| `docs/` | Design notes for planned work |
+
+Contributors should read `CLAUDE.md` before changing `poop.py` — it documents
+the non-obvious behaviour (rotated-sprite geometry, the white-key threshold,
+timer semantics) that is otherwise easy to rediscover the hard way.
+
 ## 🩺 Troubleshooting
 
 **`X Error of failed request: BadValue ... NV-GLX` on startup (Linux/X11)**
