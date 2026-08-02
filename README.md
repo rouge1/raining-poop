@@ -10,7 +10,8 @@ A fun and interactive Python application featuring animated poop emoji rain with
   - 🌀 **Spiral**: Emojis follow a circular motion while descending
   - ⬇️ **Straight**: Direct downward movement
 - **Rotating Animation**: Some poop emojis rotate as they fall for dynamic visual effects
-- **Live Counter**: A counter in the center increments from 1 to 50, then loops back
+- **Live Counter**: A counter in the center increments from 1 to 50, then loops back, outlined in white so it stays readable over the sky
+- **Cloudy Sky Backdrop**: A photographic sky (`background.jpg`) is scaled to cover the window; if the file is missing the app falls back to a plain white background
 - **Transparent Background**: Clean emoji rendering with background removal
 - **Customizable**: Easily modify speed, patterns, and appearance
 
@@ -82,6 +83,18 @@ SDL_VIDEO_X11_FORCE_EGL=1 python poop.py
 Add `export SDL_VIDEO_X11_FORCE_EGL=1` to your shell profile to make it stick.
 This is a driver/display issue, not an application bug — `LIBGL_ALWAYS_SOFTWARE`
 and `SDL_RENDER_DRIVER=software` do **not** work around it.
+
+## 🖼️ Assets
+
+| File | Source | License |
+| --- | --- | --- |
+| `background.jpg` | [Cumulus clouds in the sky](https://commons.wikimedia.org/wiki/File:Cumulus_clouds_in_the_sky.jpg) on Wikimedia Commons, originally [posted to Pixabay by *desilia*](https://pixabay.com/photos/clouds-sky-blue-sky-clouds-blue-2483302/) | [CC0 1.0 Universal Public Domain Dedication](https://creativecommons.org/publicdomain/zero/1.0/deed.en) — no attribution required, commercial use permitted |
+| `poop_emoji.png` | Bundled with the project | — |
+
+`background.jpg` is a downscaled (1920×1280) copy of the 5184×3456 Commons
+original; CC0 permits the modification. Swapping in your own image only
+requires replacing the file — `poop.py` scales whatever it finds to cover the
+400×600 window.
 
 ## 🛠️ Dependencies
 

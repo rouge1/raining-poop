@@ -17,6 +17,7 @@ class RainingPoopApp:
     SPAWN_INTERVAL_MS = 500
     ZIGZAG_AMPLITUDE = 30
     SPIRAL_MAX_RADIUS = 40
+    COUNTER_OUTLINE_WIDTH = 2
 
     def __init__(self):
         pygame.init()
@@ -27,6 +28,7 @@ class RainingPoopApp:
             self.font = pygame.font.Font(None, 48)
             # convert_alpha requires a display surface, so load after set_mode
             self.base_image, self.poop_images = self._load_poop_images()
+            self.background = self._load_background()
         except Exception:
             pygame.quit()
             raise
@@ -72,6 +74,29 @@ class RainingPoopApp:
             pygame.transform.rotate(base_image, angle) for angle in range(0, 360, 10)
         ]
         return base_image, poop_images
+
+    def _load_background(self):
+        asset_path = Path(__file__).resolve().parent / "background.jpg"
+        if not asset_path.is_file():
+            return None  # purely decorative, so draw() falls back to a plain fill
+
+        # convert(), not convert_alpha(): the sky is opaque, and skipping the
+        # per-pixel alpha keeps the full-window blit cheap.
+        image = pygame.image.load(asset_path).convert()
+
+        # Scale to cover and centre-crop; scaling straight to WIDTH x HEIGHT
+        # would squash a 3:2 photo into a 2:3 window.
+        scale = max(self.WIDTH / image.get_width(), self.HEIGHT / image.get_height())
+        image = pygame.transform.smoothscale(
+            image,
+            (
+                math.ceil(image.get_width() * scale),
+                math.ceil(image.get_height() * scale),
+            ),
+        )
+        crop = pygame.Rect(0, 0, self.WIDTH, self.HEIGHT)
+        crop.center = image.get_rect().center
+        return image.subsurface(crop).copy()
 
     def run(self):
         running = True
@@ -137,7 +162,10 @@ class RainingPoopApp:
         self.poops = [p for p in self.poops if p["y"] - self.half <= self.HEIGHT]
 
     def draw(self):
-        self.screen.fill((255, 255, 255))
+        if self.background is None:
+            self.screen.fill((255, 255, 255))
+        else:
+            self.screen.blit(self.background, (0, 0))
 
         for poop in self.poops:
             image = (
@@ -149,9 +177,15 @@ class RainingPoopApp:
             self.screen.blit(image, image.get_rect(center=(poop["x"], poop["y"])))
 
         text = self.font.render(str(self.count), True, (0, 0, 0))
-        self.screen.blit(
-            text, text.get_rect(center=(self.WIDTH // 2, self.HEIGHT // 2))
-        )
+        rect = text.get_rect(center=(self.WIDTH // 2, self.HEIGHT // 2))
+        # Black alone disappears into the darker patches of cloud, and which
+        # patch sits under the centre is not something we control, so ring the
+        # digits in white instead of trusting any one part of the sky.
+        outline = self.font.render(str(self.count), True, (255, 255, 255))
+        for dx in (-self.COUNTER_OUTLINE_WIDTH, 0, self.COUNTER_OUTLINE_WIDTH):
+            for dy in (-self.COUNTER_OUTLINE_WIDTH, 0, self.COUNTER_OUTLINE_WIDTH):
+                self.screen.blit(outline, rect.move(dx, dy))
+        self.screen.blit(text, rect)
 
         pygame.display.flip()
 
