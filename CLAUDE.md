@@ -28,8 +28,19 @@ interpreter has no pygame at all.
 
 ### Testing without a display
 
-There is no test suite, so changes get verified by running the app headless and
-inspecting a rendered frame:
+Run `smoke_test.py` after any change to `poop.py`. It drives the real app under
+SDL's dummy video driver, so it needs no display and no test framework:
+
+```bash
+python smoke_test.py     # 0 if every check passes, 1 otherwise
+```
+
+It covers asset loading and sizes, a few hundred frames of
+spawn/animate/draw, and the missing-`background.jpg` fallback. Add a check
+there rather than re-deriving a harness.
+
+For a *visual* check the smoke test can't make — "does this actually look
+right" — render a frame and open it:
 
 ```python
 import os; os.environ["SDL_VIDEODRIVER"] = "dummy"   # must precede `import pygame`
@@ -49,6 +60,7 @@ them.
 
 ```
 poop.py           the entire app
+smoke_test.py     headless checks; run after any change to poop.py
 poop_emoji.png    sprite source, 800px, white background (keyed out at load)
 background.jpg    sky backdrop, 1920×1280, CC0 (see README "Assets")
 requirements.txt  pygame>=2.5.0, pillow>=10.0.0

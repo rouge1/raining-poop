@@ -74,6 +74,7 @@ on this machine ships a compatible pygame, so create it before the first run:
 | Path | What it is |
 | --- | --- |
 | `poop.py` | The entire application — one `RainingPoopApp` class |
+| `smoke_test.py` | Headless checks — `python smoke_test.py` |
 | `poop_emoji.png` | Sprite source; its white background is keyed out at load |
 | `background.jpg` | Sky backdrop (see [Assets](#-assets)) |
 | `CLAUDE.md` | Notes for contributors: architecture and common pitfalls |
